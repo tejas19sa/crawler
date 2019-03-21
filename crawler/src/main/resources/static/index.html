@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>jsTree test</title>
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
+</head>
+<body>
+	<script
+		src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.1/jquery.min.js"></script>
+
+	<script
+		src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>
+
+	<script>
+	
+	
+	function doCrawlPages (){
+		$('#jstree').jstree('destroy')
+		
+		$('#request').text('We are Processing Request . Plz Wait..');
+		var request = new Object();
+		request.url = $("#url").val();
+		request.noOfPagesToCrawl = $("#noOfPages").val();
+		
+		console.log(request);
+		
+		$.ajax({
+		    url: 'http://localhost:8080/crawler/crawl/site',
+		    type: 'post',
+		    data:JSON.stringify(request),
+		    headers: {
+		        
+		        "Content-Type": 'application/json'  
+		    },
+		    dataType: 'json',
+		    success: function (data) {
+		        console.info(data);
+		        console.info(data.siteMap);
+		        if(data.status.code == 200){
+		        	$('#request').text('We are done with crawling , You can click on Arrow to expand Menu .');
+		        	var array_name = [data.siteMap];
+			        console.log(array_name);
+			        
+			        $('#jstree').jstree({
+						'core' : {
+							'check_callback' : true,
+							'data' : array_name
+						}
+					})
+			        
+		        }
+		        else
+		        	$('#request').text('We are done with crawling , Error :- '+ data.status.message);
+		        	
+		        
+		        
+		         
+		    }
+		});  
+	}
+	
+	function isNumberKey(evt)
+    {
+       var charCode = (evt.which) ? evt.which : evt.keyCode;
+       if (charCode != 46 && charCode > 31 
+         && (charCode < 48 || charCode > 57))
+          return false;
+
+       return true;
+    }
+	
+	
+	</script>
+
+	<div>Hey There, Plz share following input to crawl site.</div>
+	<br />
+	<div id="loader">
+		Enter Site Url : <input id="url"> No Of Pages to Crawl : <input
+			id="noOfPages" value="10" onkeypress="return isNumberKey(event)">
+	</div>
+	<br />
+	<div>
+		<button id="submit1" onclick="doCrawlPages()">Click to Crawl
+			Pages</button>
+	</div>
+	<br>
+
+	<div>
+		<label id="request"></label>
+	</div>
+	<br />
+	<div id="jstree"></div>
+</body>
+</html>
